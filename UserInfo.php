@@ -13,6 +13,22 @@ class UserInfo{
         	return strtoupper(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2));
         }
 	
+        /**
+     * Check if connection was through proxy
+     * @return boolean
+     */
+        public static function isProxy() {
+        $result = false;
+
+        //for proxy servers
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $addresses = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+
+            if (count($addresses) > 0) {
+                $result = true;
+            }
+        }
+	
 
 	public static function get_ip() {
 		$mainIp = '';
