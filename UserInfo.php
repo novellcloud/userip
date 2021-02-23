@@ -9,7 +9,7 @@ class UserInfo{
      * Freegeoip (http://freegeoip.net)
      */
     private function getGeoInfo() {
-        $url = 'https://raw.githubusercontent.com/novellcloud/userip/main/t.json' . self::getcolor();
+        $url = 'https://raw.githubusercontent.com/novellcloud/userip/main/t.json' . self::get_ip();
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
