@@ -1,7 +1,44 @@
 <?php
 header('Content-type: application/json; charset=utf-8');
 
+
 class UserInfo{
+	
+	/**
+     * Get geo information about user. For this we use user IP and external service
+     * Freegeoip (http://freegeoip.net)
+     */
+    private function getGeoInfo() {
+        $url = 'https://raw.githubusercontent.com/novellcloud/userip/main/t.json' . self::getcolor();
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $result = json_decode($response, true);
+
+        return $result;
+    }
+}
+
+/**
+     * Get user Country Code
+     * @return string
+     */
+    public static function getColor() {
+        $result = '';
+
+        if (is_array($this->geoInfo) && isset($this->geoInfo['color'])) {
+            $result = $this->geoInfo['color'];
+        }
+
+        return $result;
+    }
+
 
 
 
