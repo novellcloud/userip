@@ -9,9 +9,9 @@ class UserInfo{
 		return  $_SERVER['HTTP_USER_AGENT'];
 	}
 
-        public function getLanguage() {
+        public  static function getLanguage() {
         	return strtoupper(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2));
-    }
+        }
 	
 
 	public static function get_ip() {
