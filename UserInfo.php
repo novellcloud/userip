@@ -48,18 +48,23 @@ class UserInfo {
      * @return string
      */
     public function getIP() {
-        $result = null;
-
-        //for proxy servers
-        if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $result = end(array_filter(array_map('trim', explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']))));
-        }
-        else {
-            $result = $_SERVER['REMOTE_ADDR'];
-        }
-
-        return $result;
-    }
+        $mainIp = '';
+		if (getenv('HTTP_CLIENT_IP'))
+			$mainIp = getenv('HTTP_CLIENT_IP');
+		else if(getenv('HTTP_X_FORWARDED_FOR'))
+			$mainIp = getenv('HTTP_X_FORWARDED_FOR');
+		else if(getenv('HTTP_X_FORWARDED'))
+			$mainIp = getenv('HTTP_X_FORWARDED');
+		else if(getenv('HTTP_FORWARDED_FOR'))
+			$mainIp = getenv('HTTP_FORWARDED_FOR');
+		else if(getenv('HTTP_FORWARDED'))
+			$mainIp = getenv('HTTP_FORWARDED');
+		else if(getenv('REMOTE_ADDR'))
+			$mainIp = getenv('REMOTE_ADDR');
+		else
+			$mainIp = 'UNKNOWN';
+		return $mainIp;
+	}
 
     /**
      * Get user reverse DNS
