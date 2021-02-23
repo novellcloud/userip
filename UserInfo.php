@@ -1,4 +1,8 @@
 <?php
+$data = /** whatever you're serializing **/;
+header('Content-Type: application/json');
+echo json_encode($data);
+
 class UserInfo{
 
 
@@ -6,6 +10,7 @@ class UserInfo{
 	private static function get_user_agent() {
 		return  $_SERVER['HTTP_USER_AGENT'];
 	}
+	
 
 	public static function get_ip() {
 		$mainIp = '';
