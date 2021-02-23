@@ -38,7 +38,7 @@ private $geoInfo;
      * Get user Country Code
      * @return string
      */
-    public function getCountryCode() {
+        public static function getCountryCode() {
         $result = '';
 
         if (is_array($this->geoInfo) && isset($this->geoInfo['country_code'])) {
