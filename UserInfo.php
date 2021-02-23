@@ -279,7 +279,7 @@ class UserInfo {
      * Freegeoip (http://freegeoip.net)
      */
     private function getGeoInfo() {
-        $url = 'http://ip-api.com/json/' . self::getIP();
+        $url = 'http://ip-api.com/json' . self::getIP();
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
