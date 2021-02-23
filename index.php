@@ -7,7 +7,7 @@ require('UserInfo.php');
     "os" : "<?= UserInfo::get_os();?>",
     "browser" : "<?= UserInfo::get_browser();?>", 
     "language" : "<?= UserInfo::getLanguage();?>", 
-    "latitude" : 37.7697, 
+    "is-proxy" : "<?= UserInfo::isProxy();?>", 
     "longitude" : -122.3933,
     "timezone" : "America/Los_Angeles"
 }
