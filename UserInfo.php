@@ -150,8 +150,8 @@ class UserInfo {
     public static function getCountryCode() {
         $result = '';
 
-        if (is_array($this->geoInfo) && isset($this->geoInfo['countryCode'])) {
-            $result = $this->geoInfo['countryCode'];
+        if (is_array($this->geoInfo) && isset($this->geoInfo['country_code'])) {
+            $result = $this->geoInfo['country_code'];
         }
 
         return $result;
@@ -279,7 +279,7 @@ class UserInfo {
      * Freegeoip (http://freegeoip.net)
      */
     private function getGeoInfo() {
-        $url = 'http://ip-api.com/json' . self::getIP();
+        $url = 'https://get.geojs.io/v1/ip/geo.js' . self::getIP();
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
