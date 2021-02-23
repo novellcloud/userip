@@ -8,12 +8,8 @@ class UserInfo{
 	private static function get_user_agent() {
 		return  $_SERVER['HTTP_USER_AGENT'];
 	}
-	
-	/**
-     * Get user browser language
-     * @return string
-     */
-        public static function getLanguage() {
+
+        public function getLanguage() {
         	return strtoupper(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2));
     }
 	
