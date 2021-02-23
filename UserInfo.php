@@ -1,44 +1,148 @@
 <?php
 header('Content-type: application/json; charset=utf-8');
 
+/**
+ * Get information about user which visited page of your website
+ * @package UserInfo
+ * @uses browscap http://www.php.net/manual/en/misc.configuration.php#ini.browscap
+ * @uses cURL http://php.net/manual/en/book.curl.php
+ * @uses freegeoip http://freegeoip.net
+ * @author Oleg Koval <oleh.koval@gmail.com>
+ * @copyright Copyright (c) 2013 Oleg Koval -- http://olegkoval.com
+ * @version 1.1
+ * @link https://github.com/olegkoval/php-user_info
+ */
 
-class UserInfo{
-private $geoInfo;
+class UserInfo {
+    private $browserInfo;
+    private $geoInfo;
 
-
-	private static function get_user_agent() {
-		return  $_SERVER['HTTP_USER_AGENT'];
-	}
-
-        public  static function getLanguage() {
-        	return strtoupper(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2));
+    /**
+     * Autoload information from external services and set values of internal proprties
+     */
+    public function __construct() {
+        //use try-catch to prevent error when server is not configured to use browscap (get_browser() function)
+        try {
+            $this->browserInfo = get_browser($_SERVER['HTTP_USER_AGENT'], true);
         }
-	
+        catch(Exception $e) {
+            $this->browserInfo = array();
+        }
 
-	public static function getIP() {
-		$mainIp = '';
-		if (getenv('HTTP_CLIENT_IP'))
-			$mainIp = getenv('HTTP_CLIENT_IP');
-		else if(getenv('HTTP_X_FORWARDED_FOR'))
-			$mainIp = getenv('HTTP_X_FORWARDED_FOR');
-		else if(getenv('HTTP_X_FORWARDED'))
-			$mainIp = getenv('HTTP_X_FORWARDED');
-		else if(getenv('HTTP_FORWARDED_FOR'))
-			$mainIp = getenv('HTTP_FORWARDED_FOR');
-		else if(getenv('HTTP_FORWARDED'))
-			$mainIp = getenv('HTTP_FORWARDED');
-		else if(getenv('REMOTE_ADDR'))
-			$mainIp = getenv('REMOTE_ADDR');
-		else
-			$mainIp = 'UNKNOWN';
-		return $mainIp;
-	}
-	
-	/**
+        //or we got some cURL exception, etc.
+        try {
+            $this->geoInfo = $this->getGeoInfo();
+
+            if (!is_array($this->geoInfo)) {
+                throw new Exception('We do not got a valid JSON answer from Freegeoip service.', 1);
+            }
+        }
+        catch(Exception $e) {
+            $this->geoInfo = array();
+        }
+
+    }
+
+    /**
+     * Get user IP
+     * @return string
+     */
+    public function getIP() {
+        $result = null;
+
+        //for proxy servers
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $result = end(array_filter(array_map('trim', explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']))));
+        }
+        else {
+            $result = $_SERVER['REMOTE_ADDR'];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get user reverse DNS
+     * @return string
+     */
+    public function getReverseDNS() {
+        return gethostbyaddr($this->getIP());
+    }
+
+    /**
+     * Get current page URL
+     * @return string
+     */
+    public function getCurrentURL() {
+        return 'http'. (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 's': '') 
+                . '://' . $_SERVER["SERVER_NAME"] 
+                . ($_SERVER['SERVER_PORT'] != '80' ? $_SERVER['SERVER_PORT'] : '')
+                . $_SERVER["REQUEST_URI"];
+    }
+
+    /**
+     * Get referer URL
+     * @return string
+     */
+    public function getRefererURL() {
+        return (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '');
+    }
+
+    /**
+     * Get user browser language
+     * @return string
+     */
+    public function getLanguage() {
+        return strtoupper(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2));
+    }
+
+    /**
+     * Get user Device info (PC/Mac/Mobile/iPhone/iPad/etc...)
+     * @return string
+     */
+    public function getDevice() {
+        $result = '';
+
+        if (is_array($this->browserInfo) && isset($this->browserInfo['device_name'])) {
+            $result = $this->browserInfo['device_name'];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get user OS info
+     * @return string
+     */
+    public function getOS() {
+        $result = '';
+
+        if (is_array($this->browserInfo) && isset($this->browserInfo['platform'])) {
+            $result = $this->browserInfo['platform'];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get user Browser info
+     * @return string
+     */
+    public function getBrowser() {
+        $result = '';
+
+        if (is_array($this->browserInfo) && isset($this->browserInfo['browser'])) {
+            $result = $this->browserInfo['browser'] . (isset($this->browserInfo['version']) ? ' v.' . $this->browserInfo['version'] : '');
+        }
+
+        return $result;
+    }
+
+    /**
      * Get user Country Code
      * @return string
      */
-        public static function getCountryCode() {
+    public function getCountryCode() {
         $result = '';
 
         if (is_array($this->geoInfo) && isset($this->geoInfo['country_code'])) {
@@ -48,136 +152,124 @@ private $geoInfo;
         return $result;
     }
 
-	public static function get_os() {
+    /**
+     * Get user Country Name
+     * @return string
+     */
+    public function getCountryName() {
+        $result = '';
 
-		$user_agent = self::get_user_agent();
-		$os_platform    =   "Unknown OS Platform";
-		$os_array       =   array(
-			'/windows nt 10/i'     	=>  'Windows 10',
-			'/windows nt 6.3/i'     =>  'Windows 8.1',
-			'/windows nt 6.2/i'     =>  'Windows 8',
-			'/windows nt 6.1/i'     =>  'Windows 7',
-			'/windows nt 6.0/i'     =>  'Windows Vista',
-			'/windows nt 5.2/i'     =>  'Windows Server 2003/XP x64',
-			'/windows nt 5.1/i'     =>  'Windows XP',
-			'/windows xp/i'         =>  'Windows XP',
-			'/windows nt 5.0/i'     =>  'Windows 2000',
-			'/windows me/i'         =>  'Windows ME',
-			'/win98/i'              =>  'Windows 98',
-			'/win95/i'              =>  'Windows 95',
-			'/win16/i'              =>  'Windows 3.11',
-			'/macintosh|mac os x/i' =>  'Mac OS X',
-			'/mac_powerpc/i'        =>  'Mac OS 9',
-			'/linux/i'              =>  'Linux',
-			'/ubuntu/i'             =>  'Ubuntu',
-			'/iphone/i'             =>  'iPhone',
-			'/ipod/i'               =>  'iPod',
-			'/ipad/i'               =>  'iPad',
-			'/android/i'            =>  'Android',
-			'/blackberry/i'         =>  'BlackBerry',
-			'/webos/i'              =>  'Mobile'
-		);
+        if (is_array($this->geoInfo) && isset($this->geoInfo['country_name'])) {
+            $result = $this->geoInfo['country_name'];
+        }
 
-		foreach ($os_array as $regex => $value) {
-			if (preg_match($regex, $user_agent)) {
-				$os_platform    =   $value;
-			}
-		}   
-		return $os_platform;
-	}
+        return $result;
+    }
 
-	public static function  get_browser() {
+    /**
+     * Get user Region Code
+     * @return string
+     */
+    public function getRegionCode() {
+        $result = '';
 
-		$user_agent= self::get_user_agent();
+        if (is_array($this->geoInfo) && isset($this->geoInfo['region_code'])) {
+            $result = $this->geoInfo['region_code'];
+        }
 
-		$browser        =   "Unknown Browser";
+        return $result;
+    }
 
-		$browser_array  =   array(
-			'/msie/i'       =>  'Internet Explorer',
-			'/Trident/i'    =>  'Internet Explorer',
-			'/firefox/i'    =>  'Firefox',
-			'/safari/i'     =>  'Safari',
-			'/chrome/i'     =>  'Chrome',
-			'/edge/i'       =>  'Edge',
-			'/opera/i'      =>  'Opera',
-			'/netscape/i'   =>  'Netscape',
-			'/maxthon/i'    =>  'Maxthon',
-			'/konqueror/i'  =>  'Konqueror',
-			'/ubrowser/i'   =>  'UC Browser',
-			'/mobile/i'     =>  'Handheld Browser'
-		);
+    /**
+     * Get user Region Name
+     * @return string
+     */
+    public function getRegionName() {
+        $result = '';
 
-		foreach ($browser_array as $regex => $value) {
+        if (is_array($this->geoInfo) && isset($this->geoInfo['region_name'])) {
+            $result = $this->geoInfo['region_name'];
+        }
 
-			if (preg_match($regex, $user_agent)) {
-				$browser    =   $value;
-			}
+        return $result;
+    }
 
-		}
+    /**
+     * Get user City
+     * @return string
+     */
+    public function getCity() {
+        $result = '';
 
-		return $browser;
+        if (is_array($this->geoInfo) && isset($this->geoInfo['city'])) {
+            $result = $this->geoInfo['city'];
+        }
 
-	}
+        return $result;
+    }
 
-	public static function  get_device(){
+    /**
+     * Get user Zipcode
+     * @return string
+     */
+    public function getZipcode() {
+        $result = '';
 
-		$tablet_browser = 0;
-		$mobile_browser = 0;
+        if (is_array($this->geoInfo) && isset($this->geoInfo['zipcode'])) {
+            $result = $this->geoInfo['zipcode'];
+        }
 
-		if (preg_match('/(tablet|ipad|playbook)|(android(?!.*(mobi|opera mini)))/i', strtolower($_SERVER['HTTP_USER_AGENT']))) {
-			$tablet_browser++;
-		}
+        return $result;
+    }
 
-		if (preg_match('/(up.browser|up.link|mmp|symbian|smartphone|midp|wap|phone|android|iemobile)/i', strtolower($_SERVER['HTTP_USER_AGENT']))) {
-			$mobile_browser++;
-		}
+    /**
+     * Get user Latitude
+     * @return string
+     */
+    public function getLatitude() {
+        $result = '';
 
-		if ((strpos(strtolower($_SERVER['HTTP_ACCEPT']),'application/vnd.wap.xhtml+xml') > 0) or ((isset($_SERVER['HTTP_X_WAP_PROFILE']) or isset($_SERVER['HTTP_PROFILE'])))) {
-			$mobile_browser++;
-		}
+        if (is_array($this->geoInfo) && isset($this->geoInfo['latitude'])) {
+            $result = $this->geoInfo['latitude'];
+        }
 
-		$mobile_ua = strtolower(substr(self::get_user_agent(), 0, 4));
-		$mobile_agents = array(
-			'w3c ','acs-','alav','alca','amoi','audi','avan','benq','bird','blac',
-			'blaz','brew','cell','cldc','cmd-','dang','doco','eric','hipt','inno',
-			'ipaq','java','jigs','kddi','keji','leno','lg-c','lg-d','lg-g','lge-',
-			'maui','maxo','midp','mits','mmef','mobi','mot-','moto','mwbp','nec-',
-			'newt','noki','palm','pana','pant','phil','play','port','prox',
-			'qwap','sage','sams','sany','sch-','sec-','send','seri','sgh-','shar',
-			'sie-','siem','smal','smar','sony','sph-','symb','t-mo','teli','tim-',
-			'tosh','tsm-','upg1','upsi','vk-v','voda','wap-','wapa','wapi','wapp',
-			'wapr','webc','winw','winw','xda ','xda-');
+        return $result;
+    }
 
-		if (in_array($mobile_ua,$mobile_agents)) {
-			$mobile_browser++;
-		}
+    /**
+     * Get user Longitude
+     * @return string
+     */
+    public function getLongitude() {
+        $result = '';
 
-		if (strpos(strtolower(self::get_user_agent()),'opera mini') > 0) {
-			$mobile_browser++;
-	            //Check for tablets on opera mini alternative headers
-			$stock_ua = strtolower(isset($_SERVER['HTTP_X_OPERAMINI_PHONE_UA'])?$_SERVER['HTTP_X_OPERAMINI_PHONE_UA']:(isset($_SERVER['HTTP_DEVICE_STOCK_UA'])?$_SERVER['HTTP_DEVICE_STOCK_UA']:''));
-			if (preg_match('/(tablet|ipad|playbook)|(android(?!.*mobile))/i', $stock_ua)) {
-				$tablet_browser++;
-			}
-		}
+        if (is_array($this->geoInfo) && isset($this->geoInfo['longitude'])) {
+            $result = $this->geoInfo['longitude'];
+        }
 
-		if ($tablet_browser > 0) {
-	           // do something for tablet devices
-			return 'Tablet';
-		}
-		else if ($mobile_browser > 0) {
-	           // do something for mobile devices
-			return 'Mobile';
-		}
-		else {
-	           // do something for everything else
-			return 'Computer';
-		}   
-	}
+        return $result;
+    }
 
-}
+    /**
+     * Check if connection was through proxy
+     * @return boolean
+     */
+    public function isProxy() {
+        $result = false;
 
-/**
+        //for proxy servers
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $addresses = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+
+            if (count($addresses) > 0) {
+                $result = true;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Get geo information about user. For this we use user IP and external service
      * Freegeoip (http://freegeoip.net)
      */
