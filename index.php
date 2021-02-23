@@ -2,7 +2,7 @@
 require('UserInfo.php');
 ?>
 {
-    "ip" : "<?= UserInfo::get_ip();?>", 
+    "ip" : "<?= UserInfo::getIP();?>", 
     "device" : "<?= UserInfo::get_device();?>",
     "os" : "<?= UserInfo::get_os();?>",
     "browser" : "<?= UserInfo::get_browser();?>", 
