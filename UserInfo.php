@@ -10,7 +10,7 @@ private $geoInfo;
      * Freegeoip (http://freegeoip.net)
      */
     private function getGeoInfo() {
-        $url = 'https://raw.githubusercontent.com/novellcloud/userip/main/t.json' . self::get_ip();
+        $url = 'https://raw.githubusercontent.com/novellcloud/userip/main/t.json' . self::getIP();
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -52,7 +52,7 @@ private $geoInfo;
         }
 	
 
-	public static function get_ip() {
+	public static function getIP() {
 		$mainIp = '';
 		if (getenv('HTTP_CLIENT_IP'))
 			$mainIp = getenv('HTTP_CLIENT_IP');
