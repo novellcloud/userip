@@ -7,6 +7,6 @@ require('UserInfo.php');
     "os" : "<?= UserInfo::get_os();?>",
     "browser" : "<?= UserInfo::get_browser();?>", 
     "language" : "<?= UserInfo::getLanguage();?>", 
-    "timezone" : "America/Los_Angeles"
+    "country" : "<?= UserInfo::getCountryCode();?>", 
 }
 	
