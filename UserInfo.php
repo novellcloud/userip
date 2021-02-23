@@ -147,7 +147,7 @@ class UserInfo {
      * Get user Country Code
      * @return string
      */
-    public static function getCountryCode() {
+    public function getCountryCode() {
         $result = '';
 
         if (is_array($this->geoInfo) && isset($this->geoInfo['countryCode'])) {
