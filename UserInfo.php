@@ -3,6 +3,7 @@ header('Content-type: application/json; charset=utf-8');
 
 
 class UserInfo{
+private $geoInfo;
 	
 	/**
      * Get geo information about user. For this we use user IP and external service
