@@ -47,7 +47,7 @@ class UserInfo {
      * Get user IP
      * @return string
      */
-    public function getIP() {
+    public static function getIP() {
         $mainIp = '';
 		if (getenv('HTTP_CLIENT_IP'))
 			$mainIp = getenv('HTTP_CLIENT_IP');
