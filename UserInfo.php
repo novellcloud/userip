@@ -150,8 +150,8 @@ class UserInfo {
     public static function getCountryCode() {
         $result = '';
 
-        if (is_array($this->geoInfo) && isset($this->geoInfo['country_code'])) {
-            $result = $this->geoInfo['country_code'];
+        if (is_array($this->geoInfo) && isset($this->geoInfo['countryCode'])) {
+            $result = $this->geoInfo['countryCode'];
         }
 
         return $result;
