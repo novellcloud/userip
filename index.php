@@ -2,9 +2,9 @@
 require('UserInfo.php');
 ?>
 {
-    "ip" : <?= UserInfo::get_ip();?>, 
-    "os" : <?= UserInfo::get_device();?> 
-    "region" : "California", 
+    "ip" : "<?= UserInfo::get_ip();?>", 
+    "device" : <?= UserInfo::get_device();?> 
+    "os" : <?= UserInfo::get_os();?> 
     "country" : "US", 
     "postal" : "94107", 
     "latitude" : 37.7697, 
