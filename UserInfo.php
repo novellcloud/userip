@@ -33,6 +33,20 @@ private $geoInfo;
 			$mainIp = 'UNKNOWN';
 		return $mainIp;
 	}
+	
+	/**
+     * Get user Country Code
+     * @return string
+     */
+    public function getCountryCode() {
+        $result = '';
+
+        if (is_array($this->geoInfo) && isset($this->geoInfo['country_code'])) {
+            $result = $this->geoInfo['country_code'];
+        }
+
+        return $result;
+    }
 
 	public static function get_os() {
 
@@ -161,4 +175,25 @@ private $geoInfo;
 		}   
 	}
 
+}
+
+/**
+     * Get geo information about user. For this we use user IP and external service
+     * Freegeoip (http://freegeoip.net)
+     */
+    private function getGeoInfo() {
+        $url = 'http://ip-api.com/json/' . self::getIP();
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $result = json_decode($response, true);
+
+        return $result;
+    }
 }
