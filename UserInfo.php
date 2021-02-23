@@ -26,22 +26,6 @@ private $geoInfo;
     }
 }
 
-/**
-     * Get user Country Code
-     * @return string
-     */
-    public static function getColor() {
-        $result = '';
-
-        if (is_array($this->geoInfo) && isset($this->geoInfo['color'])) {
-            $result = $this->geoInfo['color'];
-        }
-
-        return $result;
-    }
-
-
-
 
 	private static function get_user_agent() {
 		return  $_SERVER['HTTP_USER_AGENT'];
